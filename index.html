@@ -58,6 +58,15 @@
   .seg button{appearance:none;border:0;background:transparent;font:inherit;font-size:13px;font-weight:600;
     color:var(--muted);padding:10px 16px;cursor:pointer}
   .seg button[aria-pressed=true]{background:var(--blue);color:#fff}
+  .swatches{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .swatch{width:32px;height:32px;border-radius:10px;border:2px solid #fff;
+    box-shadow:0 0 0 1px var(--line);cursor:pointer;transition:transform .1s,box-shadow .15s;padding:0;outline:none}
+  .swatch:hover{transform:scale(1.08)}
+  .swatch[aria-pressed=true]{box-shadow:0 0 0 2px var(--ink);transform:scale(1.05)}
+  .swatch-custom{position:relative;display:inline-flex;align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:10px;border:1px dashed #b6bdc9;background:#fff;cursor:pointer;
+    color:var(--muted);font-size:14px;font-weight:700;line-height:1}
+  .swatch-custom input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;border:0;padding:0;background:transparent}
   .logo-row{display:flex;align-items:center;gap:14px}
   .logo-thumb{width:46px;height:46px;border-radius:10px;border:1px solid var(--line);object-fit:contain;background:#fff;padding:5px}
   .filebtn{font:inherit;font-size:13px;font-weight:600;color:var(--blue);background:#eef5fe;border:1px solid #d3e6fb;
@@ -109,6 +118,23 @@
       </div>
 
       <div class="field">
+        <label>Corner color <span class="hint">— pick any color, or use the + for custom</span></label>
+        <div class="swatches" id="swatches">
+          <button class="swatch" data-c="#0A66C2" style="background:#0A66C2" aria-pressed="true" title="LinkedIn Blue"></button>
+          <button class="swatch" data-c="#111111" style="background:#111111" aria-pressed="false" title="Black"></button>
+          <button class="swatch" data-c="#E60023" style="background:#E60023" aria-pressed="false" title="Red"></button>
+          <button class="swatch" data-c="#1DB954" style="background:#1DB954" aria-pressed="false" title="Green"></button>
+          <button class="swatch" data-c="#FF6F00" style="background:#FF6F00" aria-pressed="false" title="Orange"></button>
+          <button class="swatch" data-c="#7B1FA2" style="background:#7B1FA2" aria-pressed="false" title="Purple"></button>
+          <button class="swatch" data-c="#E91E63" style="background:#E91E63" aria-pressed="false" title="Pink"></button>
+          <button class="swatch" data-c="#00838F" style="background:#00838F" aria-pressed="false" title="Teal"></button>
+          <label class="swatch-custom" title="Custom color">
+            +<input type="color" id="customColor" value="#0A66C2">
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
         <label>Background</label>
         <div class="seg" role="group" aria-label="Background">
           <button id="bgWhite" aria-pressed="true">White</button>
@@ -152,6 +178,19 @@ const urlInput=$("url"), canvas=$("canvas"), ctx=canvas.getContext("2d");
 const statusEl=$("status"), statusText=$("statusText"), meta=$("meta"), dlBtn=$("download");
 const bgWhiteBtn=$("bgWhite"), bgTransBtn=$("bgTrans");
 let bgWhite=true;
+let finderColor="#0A66C2";
+
+// ---- corner color picker ----
+const swatches=document.querySelectorAll("#swatches .swatch");
+const customColor=$("customColor");
+function setFinderColor(c, fromCustom=false){
+  finderColor=c;
+  swatches.forEach(b=>b.setAttribute("aria-pressed", !fromCustom && b.dataset.c.toLowerCase()===c.toLowerCase()));
+  customColor.value=c;
+  render();
+}
+swatches.forEach(b=>b.addEventListener("click",()=>setFinderColor(b.dataset.c)));
+customColor.addEventListener("input",e=>setFinderColor(e.target.value,true));
 
 let logoImg=new Image();
 logoImg.onload=render;
@@ -199,11 +238,11 @@ function rrPath(x,y,w,h,tl,tr,br,bl){
 const rrU=(x,y,w,h,r)=>rrPath(x,y,w,h,r,r,r,r);
 
 // ---- finder pattern ----
-function drawFinder(X,Y,box){
+function drawFinder(X,Y,box,color){
   const s=7*box;
-  ctx.fillStyle="#0A66C2"; rrU(X,Y,s,s,box*1.9); ctx.fill();
+  ctx.fillStyle=color; rrU(X,Y,s,s,box*1.9); ctx.fill();
   ctx.fillStyle="#ffffff"; rrU(X+box,Y+box,s-2*box,s-2*box,box*1.3); ctx.fill();
-  ctx.fillStyle="#0A66C2"; rrU(X+2*box,Y+2*box,s-4*box,s-4*box,box*0.9); ctx.fill();
+  ctx.fillStyle=color; rrU(X+2*box,Y+2*box,s-4*box,s-4*box,box*0.9); ctx.fill();
 }
 
 // ---- main render ----
@@ -246,9 +285,9 @@ function render(){
   }
 
   // finders
-  drawFinder(off,off,box);
-  drawFinder(off+(n-7)*box,off,box);
-  drawFinder(off,off+(n-7)*box,box);
+  drawFinder(off,off,box,finderColor);
+  drawFinder(off+(n-7)*box,off,box,finderColor);
+  drawFinder(off,off+(n-7)*box,box,finderColor);
 
   // center logo — size tiered by code density so it always stays scannable
   const lm = n<=33?7 : n<=41?11 : n<=45?8 : n<=57?6 : 5;
