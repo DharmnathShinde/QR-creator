@@ -3,7 +3,7 @@
 Turn any URL into a beautifully styled, scannable QR code with your logo in the center. Works with LinkedIn profiles, websites, or any link.
 
 ## Features
-
+e
 ✨ **Professional styling**
 - Rounded data modules (not blocky squares)
 - LinkedIn-blue rounded corner markers
