@@ -1,0 +1,13 @@
+# Ignore Python CLI - we only need the web tool (index.html)
+generate_qr.py
+requirements.txt
+*.pyc
+__pycache__/
+.pytest_cache/
+venv/
+env/
+.git/
+.gitignore
+README.md
+GITHUB_SETUP.md
+LICENSE
